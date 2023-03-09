@@ -573,7 +573,7 @@ defaultBank.bank_id=THE_DEFAULT_BANK_ID
 ## THUS, probably the first thing a Super Admin will do is to grant themselves or other users a number of Roles
 ## For instance, a Super Admin *CANNOT delete an entitlement* unless they grant themselves CanDeleteEntitlementAtAnyBank or CanDeleteEntitlementAtOneBank
 ## List the Users here, with their user_id(s), that should be Super Admins
-super_admin_user_ids=USER_ID1,USER_ID2,
+super_admin_user_ids=5af712c0-31c1-4757-9437-90bbc892e15a,
 ################################################################################
 
 

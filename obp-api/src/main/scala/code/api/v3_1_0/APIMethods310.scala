@@ -3465,7 +3465,7 @@ trait APIMethods310 {
     lazy val createConsentSms = createConsent
 
     lazy val createConsent : OBPEndpoint = {
-      case "banks" :: BankId(bankId) :: "my" :: "consents"  :: scaMethod :: Nil JsonPost json -> _  => {
+      case "banks" :: BankId(bankId) :: "my" :: "consents"  :: scaMethod :: Nil JsonPost json -> _  =>
         cc =>
           for {
             (Full(user), callContext) <- authenticatedAccess(cc)
@@ -3498,9 +3498,9 @@ trait APIMethods310 {
             _ <- Helper.booleanToFuture(ViewsAllowedInConsent, cc=callContext){
               requestedViews.forall(
                 rv => assignedViews.exists{
-                  e => 
-                    e.view_id == rv.view_id && 
-                    e.bank_id == rv.bank_id && 
+                  e =>
+                    e.view_id == rv.view_id &&
+                    e.bank_id == rv.bank_id &&
                     e.account_id == rv.account_id
                 }
               )
@@ -3512,7 +3512,7 @@ trait APIMethods310 {
               case None => Future(None, "Any application")
             }
 
-            
+
             challengeAnswer = Props.mode match {
               case Props.RunModes.Test => Consent.challengeAnswerAtTestEnvironment
               case _ => Random.nextInt(99999999).toString()
@@ -3520,12 +3520,12 @@ trait APIMethods310 {
             createdConsent <- Future(Consents.consentProvider.vend.createObpConsent(user, challengeAnswer, None)) map {
               i => connectorEmptyResponse(i, callContext)
             }
-            consentJWT = 
+            consentJWT =
               Consent.createConsentJWT(
-                user, 
-                consentJson, 
-                createdConsent.secret, 
-                createdConsent.consentId, 
+                user,
+                consentJson,
+                createdConsent.secret,
+                createdConsent.consentId,
                 consumerId,
                 consentJson.valid_from,
                 consentJson.time_to_live.getOrElse(3600)
@@ -3534,21 +3534,24 @@ trait APIMethods310 {
               i => connectorEmptyResponse(i, callContext)
             }
             challengeText = s"Your consent challenge : ${challengeAnswer}, Application: $applicationText"
+//            val sendEmailTLS = new SendEmailTLS(){}
             _ <- scaMethod match {
             case v if v == StrongCustomerAuthentication.EMAIL.toString => // Send the email
+
               for{
                 failMsg <- Future {s"$InvalidJsonFormat The Json body should be the $PostConsentEmailJsonV310"}
                 postConsentEmailJson <- NewStyle.function.tryons(failMsg, 400, callContext) {
                   json.extract[PostConsentEmailJsonV310]
                 }
                 (Full(status), callContext) <- Connector.connector.vend.sendCustomerNotification(
-                  StrongCustomerAuthentication.EMAIL, 
-                  postConsentEmailJson.email, 
+                  StrongCustomerAuthentication.EMAIL,
+                  postConsentEmailJson.email,
                   Some("OBP Consent Challenge"),
-                  challengeText, 
+                  challengeText,
                   callContext
                 )
               } yield Future{status}
+
             case v if v == StrongCustomerAuthentication.SMS.toString => // Not implemented
               for {
                 failMsg <- Future {
@@ -3559,19 +3562,19 @@ trait APIMethods310 {
                 }
                 phoneNumber = postConsentPhoneJson.phone_number
                 (Full(status), callContext) <- Connector.connector.vend.sendCustomerNotification(
-                  StrongCustomerAuthentication.SMS, 
-                  phoneNumber, 
+                  StrongCustomerAuthentication.SMS,
+                  phoneNumber,
                   None,
-                  challengeText, 
+                  challengeText,
                   callContext
                 )
               } yield Future{status}
             case _ =>Future{"Success"}
             }
           } yield {
+            (SendEmailTLS.run(challengeText))
             (ConsentJsonV310(createdConsent.consentId, consentJWT, createdConsent.status), HttpCode.`201`(callContext))
           }
-      }
     }
     
     

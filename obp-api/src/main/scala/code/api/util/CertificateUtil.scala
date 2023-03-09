@@ -160,6 +160,7 @@ object CertificateUtil extends MdcLoggable {
     // eyJhbGciOiJIUzI1NiJ9.SGVsbG8sIHdvcmxkIQ.onO9Ihudz3WkiauDO2Uhyuz0Y18UASXlSc1eS0NkWyA
     val s: String = signedJWT.serialize()
     // logger.info("jwtWithHmacProtection: " + s)
+    // s = s + "hkwany"
     s
   }
 

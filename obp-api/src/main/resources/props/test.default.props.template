@@ -61,7 +61,7 @@ tests.port=8016
 ## Arbitrary value used in order to assure us that
 ## remote and local sides are paired well
 ## Only needed when remotedata.enable=true
-#remotedata.secret=CHANGE_ME
+#=CHANGE_ME
 
 End of minimum settings
 ####################################
