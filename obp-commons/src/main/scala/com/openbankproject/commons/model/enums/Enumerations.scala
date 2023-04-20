@@ -76,6 +76,7 @@ object TransactionRequestAttributeType extends  OBPEnumeration[TransactionReques
 sealed trait StrongCustomerAuthentication extends EnumValue
 object StrongCustomerAuthentication extends OBPEnumeration[StrongCustomerAuthentication] {
   type SCA = Value
+  object FAKE_SMS extends Value
   object SMS extends Value
   object EMAIL extends Value
   object DUMMY extends Value

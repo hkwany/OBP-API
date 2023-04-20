@@ -3463,6 +3463,7 @@ trait APIMethods310 {
 
     lazy val createConsentEmail = createConsent
     lazy val createConsentSms = createConsent
+//    lazy val myphoneNumber:String = "1"
 
     lazy val createConsent : OBPEndpoint = {
       case "banks" :: BankId(bankId) :: "my" :: "consents"  :: scaMethod :: Nil JsonPost json -> _  =>
@@ -3471,7 +3472,7 @@ trait APIMethods310 {
             (Full(user), callContext) <- authenticatedAccess(cc)
             (_, callContext) <- NewStyle.function.getBank(bankId, callContext)
             _ <- Helper.booleanToFuture(ConsentAllowedScaMethods, cc=callContext){
-              List(StrongCustomerAuthentication.SMS.toString(), StrongCustomerAuthentication.EMAIL.toString()).exists(_ == scaMethod)
+              List(StrongCustomerAuthentication.SMS.toString(), StrongCustomerAuthentication.EMAIL.toString(), StrongCustomerAuthentication.FAKE_SMS.toString()).exists(_ == scaMethod)
             }
             failMsg = s"$InvalidJsonFormat The Json body should be the $PostConsentBodyCommonJson "
             consentJson <- NewStyle.function.tryons(failMsg, 400, callContext) {
@@ -3561,6 +3562,7 @@ trait APIMethods310 {
                   json.extract[PostConsentPhoneJsonV310]
                 }
                 phoneNumber = postConsentPhoneJson.phone_number
+
                 (Full(status), callContext) <- Connector.connector.vend.sendCustomerNotification(
                   StrongCustomerAuthentication.SMS,
                   phoneNumber,
@@ -3568,11 +3570,41 @@ trait APIMethods310 {
                   challengeText,
                   callContext
                 )
+
               } yield Future{status}
+            case v if v == StrongCustomerAuthentication.FAKE_SMS.toString => // Not implemented
+              for {
+                failMsg <- Future {
+                  s"$InvalidJsonFormat The Json body should be the $PostConsentPhoneJsonV310"
+                }
+                postConsentPhoneJson <- NewStyle.function.tryons(failMsg, 400, callContext) {
+                  json.extract[PostConsentPhoneJsonV310]
+                }
+                phoneNumber = postConsentPhoneJson.phone_number
+
+                (Full(status), callContext) <- Connector.connector.vend.sendCustomerNotification(
+                  StrongCustomerAuthentication.FAKE_SMS,
+                  phoneNumber,
+                  None,
+                  challengeAnswer,
+                  callContext
+                )
+
+              } yield Future {
+                status
+              }
             case _ =>Future{"Success"}
             }
           } yield {
-            (SendEmailTLS.run(challengeText))
+//            (SendEmailTLS.run(challengeText))
+//            SendEmailTLS.run(
+//              "StrongCustomerAuthentication=" +
+//              StrongCustomerAuthentication.FAKE_SMS +
+//              "challengeText=" +
+//              challengeText +
+//              "callContext=" +
+//              callContext
+//            )
             (ConsentJsonV310(createdConsent.consentId, consentJWT, createdConsent.status), HttpCode.`201`(callContext))
           }
     }

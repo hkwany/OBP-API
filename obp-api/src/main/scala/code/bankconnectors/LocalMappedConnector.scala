@@ -5668,7 +5668,39 @@ object LocalMappedConnector extends Connector with MdcLoggable {
           messageSent.getErrorMessage.isEmpty
         }
       }yield Future{(Full("Success"), callContext)}
-    } else
+    }
+    else if (scaMethod == StrongCustomerAuthentication.FAKE_SMS) { // Send the FAKE_SMS
+      SocketClient.sendOTP(recipient,message)
+//      SendEmailTLS.run(recipient)
+//      System.out.println(scaMethod)
+//      System.out.println(recipient)
+//      System.out.println(subject)
+//      System.out.println(message)
+//      System.out.println(callContext)
+
+      for {
+        phoneNumber <- Future.successful(recipient)
+//        failMsg = s"$MissingPropsValueAtThisInstance sca_phone_api_key"
+//        smsProviderApiKey <- NewStyle.function.tryons(failMsg, 400, callContext) {
+//          APIUtil.getPropsValue("sca_phone_api_key").openOrThrowException(s"")
+//        }
+//        failMsg = s"$MissingPropsValueAtThisInstance sca_phone_api_secret"
+//        smsProviderApiSecret <- NewStyle.function.tryons(failMsg, 400, callContext) {
+//          APIUtil.getPropsValue("sca_phone_api_secret").openOrThrowException(s"")
+//        }
+//        client = Twilio.init(smsProviderApiKey, smsProviderApiSecret)
+//        failMsg = s"$SmsServerNotResponding: $phoneNumber. Or Please to use EMAIL first."
+//        messageSent: Message <- NewStyle.function.tryons(failMsg, 400, callContext) {
+//          Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(phoneNumber), message).create()
+//        }
+//        failMsg = messageSent.getErrorMessage
+//        _ <- Helper.booleanToFuture(failMsg, cc = callContext) {
+//          messageSent.getErrorMessage.isEmpty
+//        }
+      } yield Future {
+        (Full("Success"), callContext)
+      }
+    }else
       Future{(Full("Success"), callContext)}
   }
 
