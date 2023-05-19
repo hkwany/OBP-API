@@ -12,19 +12,19 @@
 ### Base configuration
 
 ## Which data connector to use, if config `star` as connector, please also check `starConnector_supported_types` 
-#connector=mapped
+connector=mapped
 #connector=mongodb
 #connector=akka_vDec2018
 #connector=rest_vMar2019
 #connector=stored_procedure_vDec2019
-connector=star
+#connector=star
 ## proxy connector get data from LocalMappedConnector, and set the follow corresponding fields to be null: @optional, inbound.optional.fields props, outbound.optional.fields props
 ## the proxy connector only for test purpose
 #connector=proxy
 #connector=...
 
 ## if connector = star, then need to set which connectors will be used. For now, obp support rest, akka, kafka. If you set kafka, then you need to start the kafka server.
-starConnector_supported_types=mapped,internal
+#starConnector_supported_types=mapped,internal
 
 ## whether export LocalMappedConnector methods as endpoints, it is just for develop, default is false
 #connector.export.LocalMappedConnector=false
@@ -113,7 +113,7 @@ read_authentication_type_validation_requires_role=false
 # WARNING: if this number does not match the partitions in Kafka config, you will SUFFER !
 #kafka.partitions=3
 #This is the api instance, we create kafka topic based on this number, each instance should have each own id. use it in load balancing + Kafka setup
-#api_instance_id=1
+api_instance_id=1
 
 ## DEPRECATED
 ## Enable user authentication via kafka
